@@ -33,8 +33,8 @@
  */
 package fr.paris.lutece.plugins.leaflet.rest.rs;
 
-import fr.paris.lutece.plugins.rest.service.RestConstants;
 import fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider;
+import fr.paris.lutece.plugins.rest.service.RestConstants;
 import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
@@ -81,6 +81,7 @@ public class LeafletRest
             IPopupContentProvider popupContentProvider = (IPopupContentProvider) SpringContextService.getBean( BEAN_PREFIX +
                     strProvider );
             AppLogService.debug( "Leaflet popup rest API: getting icon from provider " + BEAN_PREFIX + strProvider );
+
             String popup = popupContentProvider.getPopup( request, strIdDocument, strCode );
 
             if ( popup != null )
