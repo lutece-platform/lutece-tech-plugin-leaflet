@@ -70,11 +70,6 @@ public class IconService
         return result;
     }
 
-    public static void setIcon( String iconKey, String iconCode )
-    {
-        DatastoreService.setDataValue( DATASTORE_KEYS_PREFIX + iconKey, iconCode );
-    }
-
     public static String getIcon( String strProvider, String strIconKey )
     {
         try

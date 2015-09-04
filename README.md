@@ -3,15 +3,23 @@
 
 ##Introduction
 
-
-
-##Configuration
-
-
+This plugin allows to use leaflet maps: http://leafletjs.com/
 
 ##Usage
 
+The plugin provides leaflet's core and leaflet.markercluster files in js/plugins/leaflet/leaflet. It adds a few colored icons in addition to leaflet's default blue icon (red, green, yellow). It also includes the proj4js library and the esri-leaflet plugin.
 
+In it's current form, it doesn't provide any html/javascript scaffolding, only server-side features. The user must integrate the map in a page itself.
+
+##Icons
+
+The main mechanism to use icons is to have a spring bean named "leaflet-icon-provider-XXX" implement the interface fr.paris.lutece.plugins.leaflet.service.IIconProvider. The implementor must return an icon name. The Java code for pages displaying the map can then call fr.paris.lutece.plugins.leaflet.service.IconService.getIcon() to retrieve the icon name from the resource.
+
+fr.paris.lutece.plugins.leaflet.service.IconService.getList() can be used to get a List of available icons, for example to build GUIs for users to choose an icon. To add icons to this list, add an entry in the datastore in the form ('leaflet.icon.icons.ICON_NAME.installed', 'true').
+
+##Popups
+
+The main mechanism to use popups is to have a spring bean named "leaflet-rest-popup-provider-XXX" implement the interface fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider. The implementor must produce html snippets. They will be automatically accessible at the URL rest/leaflet/popup/{XXX}/{docid}/{code} and can be loaded when the user clicks a marker with AJAX.
 
 
 [Maven documentation and reports](http://dev.lutece.paris.fr/plugins/plugin-leaflet/)

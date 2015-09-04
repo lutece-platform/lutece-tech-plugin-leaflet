@@ -11,13 +11,18 @@
             </p>
             -->
             <subsection name="Introduction">
-                <p></p>
+                <p>Ce plugin sert à utiliser des cartes leaflet: http://leafletjs.com/</p>
             </subsection>
-            <subsection name="Configuration">
-                <p></p>
+            <subsection name="Utilisation">
+                <p>Le plugin fournit les fichiers du cœur de leaflet et de leaflet.markerkcluster dans js/plugins/leaflet/leaflet. Il ajoute quelques icônes de couleur (rouge, vert, jaune) en plus de l'icône bleue par défaut de leaflet. Il inclut aussi la bibliothèque proj4js et le plugin esri-leaflet.</p>
+                <p>Dans sa version actuelle, il n'intervient pas dans l'écriture du HTML/javascript, il fournit seulement des fonctionnalités coté serveur. L'utilisateur doit intégrer la carte dans sa page lui-même.</p>
             </subsection>
-            <subsection name="Usage">
-                <p></p>
+            <subsection name="Icones">
+                <p>Le mécanisme principal pour choisir des icône est de créer un bean spring "leaflet-icon-provider-XXX" qui implémente l'interface fr.paris.lutece.plugins.leaflet.service.IIconProvider. L'implémentation doit retourner un nom d'icône. Le code java générant la page peut alors appeler la fonction fr.paris.lutece.plugins.leaflet.service.IconService.getIcon() pour obtenir un nom d'icône pour la ressource.</p>
+                <p>fr.paris.lutece.plugins.leaflet.service.IconService.getList() renvoie la liste des icônes disponibles, ce qui permet de faire des interfaces utilisateur permettant de choisir l'icône. Pour ajouter des icônes à cette liste, il faut insérer une valeur dans le datastore de la forme ('leaflet.icon.icons.ICON_NAME.installed', 'true').</p>
+            </subsection>
+            <subsection name="Popups">
+                <p>Le mécanisme principal pour obtenir des popups est de créer un bean spring "leaflet-rest-popup-provider-XXX" qui implémente l'interface fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider. L'implémentation doit produire des fragment d'html. Ils seront accessibles automatiquement à l'URL rest/leaflet/popup/{XXX}/{docid}/{code} et peuvent être chargés dynamiquement quand l'utilisateur clique sur le marqueur en AJAX.</p>
             </subsection>
         </section>
     </body>
