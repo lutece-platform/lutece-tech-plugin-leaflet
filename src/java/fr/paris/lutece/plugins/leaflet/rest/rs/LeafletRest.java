@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2015, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,10 @@ public class LeafletRest
 
     /**
      * Get an html snippet representing a leaflet popup
+     * @param request the httpServletRequest
+     * @param strProvider the provider
      * @param strIdDocument the id document
+     * @param strcode the code in this document
      * @return the html of document
      */
     @GET
@@ -80,7 +83,6 @@ public class LeafletRest
         {
             IPopupContentProvider popupContentProvider = (IPopupContentProvider) SpringContextService.getBean( BEAN_PREFIX +
                     strProvider );
-            AppLogService.debug( "Leaflet popup rest API: getting icon from provider " + BEAN_PREFIX + strProvider );
 
             String popup = popupContentProvider.getPopup( request, strIdDocument, strCode );
 

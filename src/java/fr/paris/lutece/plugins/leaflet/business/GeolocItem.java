@@ -50,17 +50,12 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * A geoloc item with methods to translate to/from geojson and to XML
+ */
 @JsonAutoDetect( creatorVisibility = Visibility.NONE, fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE )
 public class GeolocItem
 {
-    private static final ObjectMapper _objectMapper;
-
-    static
-    {
-        _objectMapper = new ObjectMapper(  );
-        _objectMapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-    }
-
     public static final String PATH_TYPE = "type";
     public static final String PATH_GEOMETRY = "geometry";
     public static final String PATH_GEOMETRY_TYPE = "type";
@@ -77,6 +72,14 @@ public class GeolocItem
     public static final String XML_LAYER = "layer";
     public static final String VALUE_TYPE = "Feature";
     public static final String VALUE_GEOMETRY_TYPE = "Point";
+    private static final ObjectMapper _objectMapper;
+
+    static
+    {
+        _objectMapper = new ObjectMapper(  );
+        _objectMapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
+    }
+
     private List<Double> _lonlat;
     private String _address;
     private String _icon;
@@ -84,12 +87,23 @@ public class GeolocItem
 
     //Example
     //{"type":"Feature","geometry":{"type":"Point","coordinates":[2.31272,48.83632]},"properties":{"layer":"aco"}}
+
+    /**
+     * Sets the Geometry
+     *
+     * @param geometry the geometry
+     */
     @JsonProperty( PATH_GEOMETRY )
     public void setGeometry( Map<String, Object> geometry )
     {
         _lonlat = (List<Double>) geometry.get( PATH_GEOMETRY_COORDINATES );
     }
 
+    /**
+     * Sets the Properties
+     *
+     * @param properties the geometry
+     */
     @JsonProperty( PATH_PROPERTIES )
     public void setProperties( Map<String, Object> properties )
     {
@@ -98,12 +112,22 @@ public class GeolocItem
         _layer = (String) properties.get( PATH_PROPERTIES_LAYER );
     }
 
+    /**
+     * Returns the Type
+     *
+     * @return The type
+     */
     @JsonProperty( PATH_TYPE )
     public String getType(  )
     {
         return VALUE_TYPE;
     }
 
+    /**
+     * Returns the Properties
+     *
+     * @return The properties
+     */
     @JsonProperty( PATH_PROPERTIES )
     public Map<String, Object> getProperties(  )
     {
@@ -127,6 +151,11 @@ public class GeolocItem
         return properties;
     }
 
+    /**
+     * Returns the Geometry
+     *
+     * @return The geometry
+     */
     @JsonProperty( PATH_GEOMETRY )
     public Map<String, Object> getGeometry(  )
     {
@@ -137,41 +166,81 @@ public class GeolocItem
         return geometry;
     }
 
+    /**
+     * Returns the LonLat
+     *
+     * @return The LonLat
+     */
     public List<Double> getLonLat(  )
     {
         return _lonlat;
     }
 
+    /**
+     * Returns the Lon
+     *
+     * @return The Lon
+     */
     public double getLon(  )
     {
         return _lonlat.get( 0 );
     }
 
+    /**
+     * Returns the Lat
+     *
+     * @return The Lat
+     */
     public double getLat(  )
     {
         return _lonlat.get( 1 );
     }
 
+    /**
+     * Returns the Address
+     *
+     * @return The address
+     */
     public String getAddress(  )
     {
         return _address;
     }
 
+    /**
+     * Returns the Icon
+     *
+     * @return The icon
+     */
     public String getIcon(  )
     {
         return _icon;
     }
 
+    /**
+     * Returns the Layer
+     *
+     * @return The layer
+     */
     public String getLayer(  )
     {
         return _layer;
     }
 
+    /**
+     * Sets the Icon
+     *
+     * @param icon the icon
+     */
     public void setIcon( String icon )
     {
         _icon = icon;
     }
 
+    /**
+     * Writes the geojson to a String
+     *
+     * @return The geojseon String
+     */
     public String toJSON(  )
     {
         try
@@ -185,33 +254,43 @@ public class GeolocItem
         }
     }
 
+    /**
+     * Writes the xml to a String. This is a non standard representation.
+     *
+     * @return The xml String
+     */
     public String toXML(  )
     {
-        StringBuffer sb = new StringBuffer(  );
-        XmlUtil.beginElement( sb, XML_ROOT );
-        XmlUtil.addElement( sb, XML_LON, _lonlat.get( 0 ).toString(  ) );
-        XmlUtil.addElement( sb, XML_LAT, _lonlat.get( 1 ).toString(  ) );
+        StringBuffer stringBuffer = new StringBuffer(  );
+        XmlUtil.beginElement( stringBuffer, XML_ROOT );
+        XmlUtil.addElement( stringBuffer, XML_LON, _lonlat.get( 0 ).toString(  ) );
+        XmlUtil.addElement( stringBuffer, XML_LAT, _lonlat.get( 1 ).toString(  ) );
 
         if ( _address != null )
         {
-            XmlUtil.addElementHtml( sb, XML_ADDRESS, _address );
+            XmlUtil.addElementHtml( stringBuffer, XML_ADDRESS, _address );
         }
 
         if ( _icon != null )
         {
-            XmlUtil.addElement( sb, XML_ICON, _icon );
+            XmlUtil.addElement( stringBuffer, XML_ICON, _icon );
         }
 
         if ( _layer != null )
         {
-            XmlUtil.addElement( sb, XML_LAYER, _layer );
+            XmlUtil.addElement( stringBuffer, XML_LAYER, _layer );
         }
 
-        XmlUtil.endElement( sb, XML_ROOT );
+        XmlUtil.endElement( stringBuffer, XML_ROOT );
 
-        return sb.toString(  );
+        return stringBuffer.toString(  );
     }
 
+    /**
+     * Parses a geojson string to build a GeolocItem Object.
+     *
+     * @return The geolocItem object
+     */
     public static GeolocItem fromJSON( String strJson )
         throws JsonParseException, JsonMappingException, IOException
     {

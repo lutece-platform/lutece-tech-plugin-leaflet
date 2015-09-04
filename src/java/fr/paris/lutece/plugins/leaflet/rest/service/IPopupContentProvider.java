@@ -36,7 +36,18 @@ package fr.paris.lutece.plugins.leaflet.rest.service;
 import javax.servlet.http.HttpServletRequest;
 
 
+/**
+ * A provider of html fragments for popups on maps
+ */
 public interface IPopupContentProvider
 {
-    public String getPopup( HttpServletRequest request, String strIdDocument, String strCode );
+    /**
+     * Returns an html fragment representing the document.
+     * The code can be used to return different representations for the same document
+     * @param request the HttpServletRequest
+     * @param strIdDocument the document ID
+     * @param strCode the code
+     * @return The icon name
+     */
+    String getPopup( HttpServletRequest request, String strIdDocument, String strCode );
 }

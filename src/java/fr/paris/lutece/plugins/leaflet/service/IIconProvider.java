@@ -33,7 +33,16 @@
  */
 package fr.paris.lutece.plugins.leaflet.service;
 
+
+/**
+ * A provider of icons for maps
+ */
 public interface IIconProvider
 {
-    public String getIcon( String iconKey );
+    /**
+     * Returns the icon name associated with this key
+     * @param iconKey the icon key
+     * @return The icon name
+     */
+    String getIcon( String iconKey );
 }

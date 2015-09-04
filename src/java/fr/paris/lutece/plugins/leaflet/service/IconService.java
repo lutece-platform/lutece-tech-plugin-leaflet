@@ -46,30 +46,50 @@ import java.util.Collection;
 import java.util.HashSet;
 
 
+/**
+ * A service for icons
+ */
 public class IconService
 {
     private static final String BEAN_PREFIX = "leaflet-icon-provider-";
     private static final String DATASTORE_PREFIX = "leaflet.icon.";
     private static final String DATASTORE_ICONS_PREFIX = DATASTORE_PREFIX + "icons.";
-    private static final String DATASTORE_KEYS_PREFIX = DATASTORE_PREFIX + "keys.";
 
+
+    /** Private constructor */
+    private IconService(  )
+    {
+    }
+
+    /**
+     * Returns the list of installed icons.
+     *
+     * @return the list of icons
+     */
     public static Collection<String> getList(  )
     {
-        ReferenceList rl = DatastoreService.getDataByPrefix( DATASTORE_ICONS_PREFIX );
-        HashSet<String> hs = new HashSet<String>(  );
+        ReferenceList referenceList = DatastoreService.getDataByPrefix( DATASTORE_ICONS_PREFIX );
+        HashSet<String> hashSet = new HashSet<String>(  );
 
-        for ( ReferenceItem ri : rl )
+        for ( ReferenceItem referenceItem : referenceList )
         {
-            String codeSuffix = ri.getCode(  ).substring( DATASTORE_ICONS_PREFIX.length(  ) );
-            String code = codeSuffix.substring( 0, codeSuffix.indexOf( "." ) );
-            hs.add( code );
+            String codeSuffix = referenceItem.getCode(  ).substring( DATASTORE_ICONS_PREFIX.length(  ) );
+            String code = codeSuffix.substring( 0, codeSuffix.indexOf( '.' ) );
+            hashSet.add( code );
         }
 
-        ArrayList<String> result = new ArrayList<String>( hs );
+        ArrayList<String> result = new ArrayList<String>( hashSet );
 
         return result;
     }
 
+    /**
+     * Returns the name of an icon based on the provider and the key.
+     *
+     * @param strProvider the provider
+     * @param strIconKey the key
+     * @return the icon name
+     */
     public static String getIcon( String strProvider, String strIconKey )
     {
         try
