@@ -23,6 +23,13 @@
             </subsection>
             <subsection name="Popups">
                 <p>Le mécanisme principal pour obtenir des popups est de créer un bean spring "leaflet-rest-popup-provider-XXX" qui implémente l'interface fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider. L'implémentation doit produire des fragment d'html. Ils seront accessibles automatiquement à l'URL rest/leaflet/popup/{XXX}/{docid}/{code} et peuvent être chargés dynamiquement quand l'utilisateur clique sur le marqueur en AJAX.</p>
+                <p>Les headers CORS peuvent être activés avec les propriétés suivantes:
+                    <ul>
+                        <li>leaflet.cors.enabled (default false)</li>
+                        <li>leaflet.cors.origin  (default *)</li>
+                        <li>leaflet.cors.methods (default GET, POST, DELETE, PUT)</li>
+                    </ul>
+                </p>
             </subsection>
         </section>
     </body>

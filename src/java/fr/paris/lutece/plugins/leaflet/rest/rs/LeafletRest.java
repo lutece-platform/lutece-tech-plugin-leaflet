@@ -38,6 +38,7 @@ import fr.paris.lutece.plugins.rest.service.RestConstants;
 import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
+import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -48,6 +49,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 
 /**
@@ -63,6 +66,15 @@ public class LeafletRest
     private static final String PATH_POPUP = "popup/{" + PARAMETER_PROVIDER + "}/{" + PARAMETER_ID_DOCUMENT + "}/{" +
         PARAMETER_CODE + "}";
 
+    private static final String PROPERTY_CORS_ENABLED_KEY = "leaflet.cors.enabled";
+    private static final boolean PROPERTY_CORS_ENABLED_DEFAULT = false;
+
+    private static final String PROPERTY_CORS_ORIGIN_KEY = "leaflet.cors.origin";
+    private static final String PROPERTY_CORS_ORIGIN_DEFAULT = "*";
+
+    private static final String PROPERTY_CORS_METHODS_KEY = "leaflet.cors.methods";
+    private static final String PROPERTY_CORS_METHODS_DEFAULT =  "GET, POST, DELETE, PUT";
+
     /**
      * Get an html snippet representing a leaflet popup
      * @param request the httpServletRequest
@@ -73,7 +85,7 @@ public class LeafletRest
      */
     @GET
     @Path( PATH_POPUP )
-    public String getDocument( @Context
+    public Response getDocument( @Context
     HttpServletRequest request, @PathParam( PARAMETER_PROVIDER )
     String strProvider, @PathParam( PARAMETER_ID_DOCUMENT )
     String strIdDocument, @PathParam( PARAMETER_CODE )
@@ -90,7 +102,17 @@ public class LeafletRest
             {
                 String popupLocalized = I18nService.localize( popup, request.getLocale(  ) );
 
-                return popupLocalized;
+                ResponseBuilder responseBuilder = Response.ok();
+                if ( AppPropertiesService.getPropertyBoolean( PROPERTY_CORS_ENABLED_KEY, PROPERTY_CORS_ENABLED_DEFAULT ) ) {
+                    String strCorsOrigin = AppPropertiesService.getProperty( PROPERTY_CORS_ORIGIN_KEY, PROPERTY_CORS_ORIGIN_DEFAULT);
+                    String strCorsMethods = AppPropertiesService.getProperty( PROPERTY_CORS_METHODS_KEY, PROPERTY_CORS_METHODS_DEFAULT);
+                    responseBuilder
+                        .header("Access-Control-Allow-Origin", strCorsOrigin)
+                        .header("Access-Control-Allow-Methods", strCorsMethods);
+                }
+                return responseBuilder
+                    .entity(popupLocalized)
+                    .build();
             }
 
             AppLogService.debug( "Leaflet popup rest API: icon was null" );
