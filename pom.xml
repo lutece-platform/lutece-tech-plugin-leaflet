@@ -40,7 +40,7 @@
     <properties>
         <componentName>leaflet</componentName>
         <jiraProjectName>LEAFLET</jiraProjectName>
-        <jiraComponentId />
+        <jiraComponentId/>
     </properties>
 
     <scm>
