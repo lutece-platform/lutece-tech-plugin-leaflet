@@ -80,7 +80,7 @@ public class LeafletRest
      * @param request the httpServletRequest
      * @param strProvider the provider
      * @param strIdDocument the id document
-     * @param strcode the code in this document
+     * @param strCode the code in this document
      * @return the html of document
      */
     @GET
