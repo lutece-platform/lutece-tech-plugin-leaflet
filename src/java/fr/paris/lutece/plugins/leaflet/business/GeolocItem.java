@@ -35,12 +35,10 @@ package fr.paris.lutece.plugins.leaflet.business;
 
 import fr.paris.lutece.util.xml.XmlUtil;
 
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -96,7 +94,7 @@ public class GeolocItem
     @JsonProperty( PATH_GEOMETRY )
     public void setGeometry( Map<String, Object> geometry )
     {
-        _lonlat = (List<Double>) geometry.get( PATH_GEOMETRY_COORDINATES );
+        _lonlat = ( List<Double> ) geometry.get( PATH_GEOMETRY_COORDINATES );
     }
 
     /**
@@ -131,7 +129,7 @@ public class GeolocItem
     @JsonProperty( PATH_PROPERTIES )
     public Map<String, Object> getProperties(  )
     {
-        HashMap<String, Object> properties = new HashMap<String, Object>(  );
+        HashMap<String, Object> properties = new HashMap<>(  );
 
         if ( _address != null )
         {
@@ -159,7 +157,7 @@ public class GeolocItem
     @JsonProperty( PATH_GEOMETRY )
     public Map<String, Object> getGeometry(  )
     {
-        HashMap<String, Object> geometry = new HashMap<String, Object>(  );
+        HashMap<String, Object> geometry = new HashMap<>(  );
         geometry.put( PATH_GEOMETRY_TYPE, VALUE_GEOMETRY_TYPE );
         geometry.put( PATH_GEOMETRY_COORDINATES, _lonlat );
 
@@ -292,7 +290,7 @@ public class GeolocItem
      * @return The geolocItem object
      */
     public static GeolocItem fromJSON( String strJson )
-        throws JsonParseException, JsonMappingException, IOException
+        throws IOException
     {
         return _objectMapper.readValue( strJson, GeolocItem.class );
     }
