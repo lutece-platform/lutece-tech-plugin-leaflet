@@ -69,7 +69,7 @@ public class IconService
     public static Collection<String> getList(  )
     {
         ReferenceList referenceList = DatastoreService.getDataByPrefix( DATASTORE_ICONS_PREFIX );
-        HashSet<String> hashSet = new HashSet<String>(  );
+        HashSet<String> hashSet = new HashSet<>(  );
 
         for ( ReferenceItem referenceItem : referenceList )
         {
@@ -78,9 +78,7 @@ public class IconService
             hashSet.add( code );
         }
 
-        ArrayList<String> result = new ArrayList<String>( hashSet );
-
-        return result;
+        return new ArrayList<>( hashSet );
     }
 
     /**
