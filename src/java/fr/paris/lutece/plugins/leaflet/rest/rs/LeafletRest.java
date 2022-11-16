@@ -33,17 +33,7 @@
  */
 package fr.paris.lutece.plugins.leaflet.rest.rs;
 
-import fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider;
-import fr.paris.lutece.plugins.rest.service.RestConstants;
-import fr.paris.lutece.portal.service.i18n.I18nService;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
-import fr.paris.lutece.portal.service.util.AppLogService;
-import fr.paris.lutece.portal.service.util.AppPropertiesService;
-
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-
 import javax.servlet.http.HttpServletRequest;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -51,6 +41,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+
+import fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider;
+import fr.paris.lutece.plugins.leaflet.service.CorsUtils;
+import fr.paris.lutece.plugins.rest.service.RestConstants;
+import fr.paris.lutece.portal.service.i18n.I18nService;
+import fr.paris.lutece.portal.service.spring.SpringContextService;
+import fr.paris.lutece.portal.service.util.AppLogService;
+import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 
 /**
@@ -69,8 +69,8 @@ public class LeafletRest
     private static final String PROPERTY_CORS_ENABLED_KEY = "leaflet.cors.enabled";
     private static final boolean PROPERTY_CORS_ENABLED_DEFAULT = false;
 
-    private static final String PROPERTY_CORS_ORIGIN_KEY = "leaflet.cors.origin";
-    private static final String PROPERTY_CORS_ORIGIN_DEFAULT = "*";
+  
+    private static final String HEADER_ORIGIN = "origin";
 
     private static final String PROPERTY_CORS_METHODS_KEY = "leaflet.cors.methods";
     private static final String PROPERTY_CORS_METHODS_DEFAULT =  "GET, POST, DELETE, PUT";
@@ -104,11 +104,12 @@ public class LeafletRest
 
                 ResponseBuilder responseBuilder = Response.ok();
                 if ( AppPropertiesService.getPropertyBoolean( PROPERTY_CORS_ENABLED_KEY, PROPERTY_CORS_ENABLED_DEFAULT ) ) {
-                    String strCorsOrigin = AppPropertiesService.getProperty( PROPERTY_CORS_ORIGIN_KEY, PROPERTY_CORS_ORIGIN_DEFAULT);
-                    String strCorsMethods = AppPropertiesService.getProperty( PROPERTY_CORS_METHODS_KEY, PROPERTY_CORS_METHODS_DEFAULT);
-                    responseBuilder
-                        .header("Access-Control-Allow-Origin", strCorsOrigin)
-                        .header("Access-Control-Allow-Methods", strCorsMethods);
+                    
+                	String strHeaderOrigin = request.getHeader( HEADER_ORIGIN );
+                	String strAccessControlAllowOrigin = CorsUtils.isValidOrigin( strHeaderOrigin ) ? strHeaderOrigin : "";
+                	String strCorsMethods = AppPropertiesService.getProperty( PROPERTY_CORS_METHODS_KEY, PROPERTY_CORS_METHODS_DEFAULT);
+                    responseBuilder .header("Access-Control-Allow-Methods", strCorsMethods).header("Access-Control-Allow-Origin", strAccessControlAllowOrigin);
+                    
                 }
                 return responseBuilder
                     .entity(popupLocalized)
@@ -125,4 +126,5 @@ public class LeafletRest
             throw new WebApplicationException( 404 );
         }
     }
+   
 }
