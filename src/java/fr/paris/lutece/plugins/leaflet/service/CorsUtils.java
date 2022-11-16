@@ -74,10 +74,23 @@ public final class CorsUtils
        
         String strAuthorizedOrigin = AppPropertiesService.getProperty( PROPERTY_CORS_ORIGIN_KEY );
 
-        if ( !StringUtils.isEmpty( strAuthorizedOrigin ) )
+        return isValidOrigin(strOrigin, strAuthorizedOrigin);
+    }
+    
+    /**
+     * Checks if is valid origin.
+     *
+     * @param strOrigin the str origin
+     * @param strCorsOriginPatterns the cors origin pattern used to test
+     * @return the boolean
+     */
+    public static Boolean isValidOrigin( String strOrigin,String strCorsOriginPatterns)
+    {
+       
+        if ( !StringUtils.isEmpty( strCorsOriginPatterns ) )
         {
          
-            String [ ] tabAuthorizedDomains = strAuthorizedOrigin.split( "," );
+            String [ ] tabAuthorizedDomains = strCorsOriginPatterns.split( "," );
 
             for ( int i = 0; i < tabAuthorizedDomains.length; i++ )
             {

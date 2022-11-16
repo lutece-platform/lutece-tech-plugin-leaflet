@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2015, Mairie de Paris
+ * Copyright (c) 2002-2022, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,7 @@ public class LeafletRest
     {
         try
         {
+        	
             IPopupContentProvider popupContentProvider = (IPopupContentProvider) SpringContextService.getBean( BEAN_PREFIX +
                     strProvider );
 
