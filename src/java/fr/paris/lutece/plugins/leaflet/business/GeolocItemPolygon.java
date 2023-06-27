@@ -35,11 +35,15 @@ package fr.paris.lutece.plugins.leaflet.business;
 
 import fr.paris.lutece.util.xml.XmlUtil;
 
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+/*
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+*/
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -49,29 +53,32 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
+import java.io.IOException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * A geoloc item with methods to translate to/from geojson and to XML
  */
 @JsonAutoDetect( creatorVisibility = Visibility.NONE, fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE )
-public class GeolocItem
+public class GeolocItemPolygon
 {
     public static final String PATH_TYPE = "type";
     public static final String PATH_GEOMETRY = "geometry";
     public static final String PATH_GEOMETRY_TYPE = "type";
     public static final String PATH_GEOMETRY_COORDINATES = "coordinates";
     public static final String PATH_PROPERTIES = "properties";
-    public static final String PATH_PROPERTIES_ADDRESS = "address";
     public static final String PATH_PROPERTIES_ICON = "icon";
     public static final String PATH_PROPERTIES_LAYER = "layer";
     public static final String XML_ROOT = "geoloc";
     public static final String XML_LON = "lon";
     public static final String XML_LAT = "lat";
-    public static final String XML_ADDRESS = "address";
     public static final String XML_ICON = "icon";
     public static final String XML_LAYER = "layer";
     public static final String VALUE_TYPE = "Feature";
-    public static final String VALUE_GEOMETRY_TYPE = "Point";
     public static final String VALUE_GEOMETRY_TYPE_POLYGON = "Polygon";
     public static final String VALUE_GEOMETRY_TYPE_POLYLINE = "Polyline";
     private static final ObjectMapper _objectMapper;
@@ -79,15 +86,16 @@ public class GeolocItem
     static
     {
         _objectMapper = new ObjectMapper(  );
+        //_objectMapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
         _objectMapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
     }
 
     private List<Double> _lonlat;
-    private String _address;
+    private List<List<Double>> _polygonLonLoat;
     private String _icon;
     private String _layer;
     private String _typegeometry;
-    private List<List<Double>> _polygonLonLoat;
+    private String _typePolygon;
 
     //Example
     //{"type":"Feature","geometry":{"type":"Point","coordinates":[2.31272,48.83632]},"properties":{"layer":"aco"}}
@@ -100,15 +108,9 @@ public class GeolocItem
     @JsonProperty( PATH_GEOMETRY )
     public void setGeometry( Map<String, Object> geometry )
     {
-        _typegeometry = (String) geometry.get( PATH_GEOMETRY_TYPE );
-        if ( _typegeometry.equals( VALUE_GEOMETRY_TYPE ) )
-        {
-        	_lonlat = (List<Double>) geometry.get( PATH_GEOMETRY_COORDINATES );
-        }
-        else if ( _typegeometry.equals( VALUE_GEOMETRY_TYPE_POLYGON ) || _typegeometry.equals( VALUE_GEOMETRY_TYPE_POLYLINE ) )
-        {
-        	_polygonLonLoat = ( List<List<Double>> ) geometry.get( PATH_GEOMETRY_COORDINATES );
-        }
+        //_lonlat = (List<Double>) geometry.get( PATH_GEOMETRY_COORDINATES );
+        //_polygonLonLoat.add(_lonlat);
+    	_polygonLonLoat = ( List<List<Double>> ) geometry.get( PATH_GEOMETRY_COORDINATES );
     }
 
     /**
@@ -119,7 +121,6 @@ public class GeolocItem
     @JsonProperty( PATH_PROPERTIES )
     public void setProperties( Map<String, Object> properties )
     {
-        _address = (String) properties.get( PATH_PROPERTIES_ADDRESS );
         _icon = (String) properties.get( PATH_PROPERTIES_ICON );
         _layer = (String) properties.get( PATH_PROPERTIES_LAYER );
     }
@@ -145,11 +146,6 @@ public class GeolocItem
     {
         HashMap<String, Object> properties = new HashMap<String, Object>(  );
 
-        if ( _address != null )
-        {
-            properties.put( PATH_PROPERTIES_ADDRESS, _address );
-        }
-
         if ( _icon != null )
         {
             properties.put( PATH_PROPERTIES_ICON, _icon );
@@ -172,15 +168,10 @@ public class GeolocItem
     public Map<String, Object> getGeometry(  )
     {
         HashMap<String, Object> geometry = new HashMap<String, Object>(  );
+        //geometry.put( PATH_GEOMETRY_TYPE, VALUE_GEOMETRY_TYPE_POLYGON );
         geometry.put( PATH_GEOMETRY_TYPE, _typegeometry );
-        if ( _typegeometry.equals( VALUE_GEOMETRY_TYPE ) )
-        {
-        	geometry.put( PATH_GEOMETRY_COORDINATES, _lonlat );
-        }
-        else if ( _typegeometry.equals( VALUE_GEOMETRY_TYPE_POLYGON ) || _typegeometry.equals( VALUE_GEOMETRY_TYPE_POLYLINE ) )
-        {
-        	geometry.put( PATH_GEOMETRY_COORDINATES, _polygonLonLoat );
-        }
+        //geometry.put( PATH_GEOMETRY_COORDINATES, _lonlat );
+        geometry.put( PATH_GEOMETRY_COORDINATES, _polygonLonLoat );
 
         return geometry;
     }
@@ -213,16 +204,6 @@ public class GeolocItem
     public double getLat(  )
     {
         return _lonlat.get( 1 );
-    }
-
-    /**
-     * Returns the Address
-     *
-     * @return The address
-     */
-    public String getAddress(  )
-    {
-        return _address;
     }
 
     /**
@@ -285,11 +266,6 @@ public class GeolocItem
         XmlUtil.addElement( stringBuffer, XML_LON, _lonlat.get( 0 ).toString(  ) );
         XmlUtil.addElement( stringBuffer, XML_LAT, _lonlat.get( 1 ).toString(  ) );
 
-        if ( _address != null )
-        {
-            XmlUtil.addElementHtml( stringBuffer, XML_ADDRESS, _address );
-        }
-
         if ( _icon != null )
         {
             XmlUtil.addElement( stringBuffer, XML_ICON, _icon );
@@ -310,10 +286,10 @@ public class GeolocItem
      *
      * @return The geolocItem object
      */
-    public static GeolocItem fromJSON( String strJson )
+    public static GeolocItemPolygon fromJSON( String strJson )
         throws JsonParseException, JsonMappingException, IOException
     {
-        return _objectMapper.readValue( strJson, GeolocItem.class );
+        return _objectMapper.readValue( strJson, GeolocItemPolygon.class );
     }
 
 	public String getTypegeometry() {
