@@ -35,21 +35,10 @@ package fr.paris.lutece.plugins.leaflet.business;
 
 import fr.paris.lutece.util.xml.XmlUtil;
 
-/*
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-*/
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
@@ -86,7 +75,6 @@ public class GeolocItemPolygon
     static
     {
         _objectMapper = new ObjectMapper(  );
-        //_objectMapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
         _objectMapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
     }
 
@@ -144,7 +132,7 @@ public class GeolocItemPolygon
     @JsonProperty( PATH_PROPERTIES )
     public Map<String, Object> getProperties(  )
     {
-        HashMap<String, Object> properties = new HashMap<String, Object>(  );
+        Map<String, Object> properties = new HashMap<>(  );
 
         if ( _icon != null )
         {
@@ -167,7 +155,7 @@ public class GeolocItemPolygon
     @JsonProperty( PATH_GEOMETRY )
     public Map<String, Object> getGeometry(  )
     {
-        HashMap<String, Object> geometry = new HashMap<String, Object>(  );
+        Map<String, Object> geometry = new HashMap<>(  );
         //geometry.put( PATH_GEOMETRY_TYPE, VALUE_GEOMETRY_TYPE_POLYGON );
         geometry.put( PATH_GEOMETRY_TYPE, _typegeometry );
         //geometry.put( PATH_GEOMETRY_COORDINATES, _lonlat );
@@ -287,7 +275,7 @@ public class GeolocItemPolygon
      * @return The geolocItem object
      */
     public static GeolocItemPolygon fromJSON( String strJson )
-        throws JsonParseException, JsonMappingException, IOException
+        throws IOException
     {
         return _objectMapper.readValue( strJson, GeolocItemPolygon.class );
     }

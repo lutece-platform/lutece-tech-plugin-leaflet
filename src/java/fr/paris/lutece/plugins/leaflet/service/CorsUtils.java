@@ -34,9 +34,8 @@
 package fr.paris.lutece.plugins.leaflet.service;
 
 
+import fr.paris.lutece.util.http.AntPathMatcher;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
@@ -49,7 +48,7 @@ public final class CorsUtils
 {
     
     /** The Constant PATH_MATCHER. */
-    private final static PathMatcher PATH_MATCHER = new AntPathMatcher( );
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher( );
     
     /** The Constant PROPERTY_CORS_ORIGIN_KEY. */
     private static final String PROPERTY_CORS_ORIGIN_KEY = "leaflet.cors.origin"; 
