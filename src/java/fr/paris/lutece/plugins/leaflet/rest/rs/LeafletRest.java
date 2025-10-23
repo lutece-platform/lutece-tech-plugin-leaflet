@@ -33,22 +33,24 @@
  */
 package fr.paris.lutece.plugins.leaflet.rest.rs;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.literal.NamedLiteral;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import fr.paris.lutece.plugins.leaflet.rest.service.IPopupContentProvider;
 import fr.paris.lutece.plugins.leaflet.service.CorsUtils;
 import fr.paris.lutece.plugins.rest.service.RestConstants;
 import fr.paris.lutece.portal.service.i18n.I18nService;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
@@ -56,6 +58,8 @@ import fr.paris.lutece.portal.service.util.AppPropertiesService;
 /**
  * LeafletRest
  */
+@ApplicationScoped
+@Named( "leaflet-rest.leafletRest" )
 @Path( RestConstants.BASE_PATH + "leaflet" )
 public class LeafletRest
 {
@@ -69,11 +73,13 @@ public class LeafletRest
     private static final String PROPERTY_CORS_ENABLED_KEY = "leaflet.cors.enabled";
     private static final boolean PROPERTY_CORS_ENABLED_DEFAULT = false;
 
-  
     private static final String HEADER_ORIGIN = "origin";
 
     private static final String PROPERTY_CORS_METHODS_KEY = "leaflet.cors.methods";
     private static final String PROPERTY_CORS_METHODS_DEFAULT =  "GET, POST, DELETE, PUT";
+
+    @Inject
+    private Instance<IPopupContentProvider>  _popupContentProviderInstance;
 
     /**
      * Get an html snippet representing a leaflet popup
@@ -85,47 +91,65 @@ public class LeafletRest
      */
     @GET
     @Path( PATH_POPUP )
-    public Response getDocument( @Context
-    HttpServletRequest request, @PathParam( PARAMETER_PROVIDER )
-    String strProvider, @PathParam( PARAMETER_ID_DOCUMENT )
-    String strIdDocument, @PathParam( PARAMETER_CODE )
-    String strCode )
+    public Response getDocument( @Context HttpServletRequest request,
+    @PathParam( PARAMETER_PROVIDER ) String strProvider,
+    @PathParam( PARAMETER_ID_DOCUMENT ) String strIdDocument,
+    @PathParam( PARAMETER_CODE ) String strCode )
     {
-        try
+        Instance<IPopupContentProvider> selectedProviderInstance = _popupContentProviderInstance.select( NamedLiteral.of( BEAN_PREFIX + strProvider ) );
+
+        String popup = getPopupContentProvider( selectedProviderInstance, strProvider, strIdDocument ).getPopup( request, strIdDocument, strCode );
+
+        if ( popup != null )
         {
-        	
-            IPopupContentProvider popupContentProvider = (IPopupContentProvider) SpringContextService.getBean( BEAN_PREFIX +
-                    strProvider );
+            String popupLocalized = I18nService.localize( popup, request.getLocale(  ) );
 
-            String popup = popupContentProvider.getPopup( request, strIdDocument, strCode );
+            ResponseBuilder responseBuilder = Response.ok();
+            if ( AppPropertiesService.getPropertyBoolean( PROPERTY_CORS_ENABLED_KEY, PROPERTY_CORS_ENABLED_DEFAULT ) ) {
 
-            if ( popup != null )
-            {
-                String popupLocalized = I18nService.localize( popup, request.getLocale(  ) );
+                String strHeaderOrigin = request.getHeader( HEADER_ORIGIN );
+                String strAccessControlAllowOrigin = CorsUtils.isValidOrigin( strHeaderOrigin ) ? strHeaderOrigin : "";
+                String strCorsMethods = AppPropertiesService.getProperty( PROPERTY_CORS_METHODS_KEY, PROPERTY_CORS_METHODS_DEFAULT);
+                responseBuilder .header("Access-Control-Allow-Methods", strCorsMethods).header("Access-Control-Allow-Origin", strAccessControlAllowOrigin);
 
-                ResponseBuilder responseBuilder = Response.ok();
-                if ( AppPropertiesService.getPropertyBoolean( PROPERTY_CORS_ENABLED_KEY, PROPERTY_CORS_ENABLED_DEFAULT ) ) {
-                    
-                	String strHeaderOrigin = request.getHeader( HEADER_ORIGIN );
-                	String strAccessControlAllowOrigin = CorsUtils.isValidOrigin( strHeaderOrigin ) ? strHeaderOrigin : "";
-                	String strCorsMethods = AppPropertiesService.getProperty( PROPERTY_CORS_METHODS_KEY, PROPERTY_CORS_METHODS_DEFAULT);
-                    responseBuilder .header("Access-Control-Allow-Methods", strCorsMethods).header("Access-Control-Allow-Origin", strAccessControlAllowOrigin);
-                    
-                }
-                return responseBuilder
-                    .entity(popupLocalized)
-                    .build();
             }
+            return responseBuilder
+                .entity(popupLocalized)
+                .build();
+        }
 
-            AppLogService.debug( "Leaflet popup rest API: icon was null" );
-            throw new WebApplicationException( 404 );
-        }
-        catch ( NoSuchBeanDefinitionException e )
-        {
-            AppLogService.error( "Leaflet popup rest API: Missing strProvider " + strProvider + " , strDocId " +
-                strIdDocument + ", exception " + e );
-            throw new WebApplicationException( 404 );
-        }
+        AppLogService.debug( "Leaflet popup rest API: icon was null" );
+        throw new WebApplicationException( 404 );
     }
-   
+
+    /**
+     * Get the popup provider from a provider instance
+     *
+     * @param popupContentProviderInstance the provider instance
+     * @param strProvider the provider
+     * @param strIdDocument the id document
+     * @return the provider
+     * @throws WebApplicationException if the provider cannot be resolved
+     */
+    private IPopupContentProvider getPopupContentProvider( Instance<IPopupContentProvider> popupContentProviderInstance,
+                                                           String strProvider, String strIdDocument )
+    {
+        if ( popupContentProviderInstance.isUnsatisfied( ) )
+        {
+            AppLogService.error(
+                "Leaflet popup rest API: No provider found for provider '{}' , document ID '{}'", strProvider, strIdDocument
+            );
+            throw new WebApplicationException( 404 );
+        }
+
+        if ( popupContentProviderInstance.isAmbiguous( ) )
+        {
+            AppLogService.error(
+                "Leaflet popup rest API: Multiple providers found for provider '{}' , document ID '{}'", strProvider, strIdDocument
+            );
+            throw new WebApplicationException( 404 );
+        }
+
+        return popupContentProviderInstance.get( );
+    }
 }

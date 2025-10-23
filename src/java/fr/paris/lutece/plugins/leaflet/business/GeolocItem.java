@@ -44,8 +44,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
@@ -143,7 +141,7 @@ public class GeolocItem
     @JsonProperty( PATH_PROPERTIES )
     public Map<String, Object> getProperties(  )
     {
-        HashMap<String, Object> properties = new HashMap<String, Object>(  );
+        Map<String, Object> properties = new HashMap<>(  );
 
         if ( _address != null )
         {
@@ -171,7 +169,7 @@ public class GeolocItem
     @JsonProperty( PATH_GEOMETRY )
     public Map<String, Object> getGeometry(  )
     {
-        HashMap<String, Object> geometry = new HashMap<String, Object>(  );
+        Map<String, Object> geometry = new HashMap<>(  );
         geometry.put( PATH_GEOMETRY_TYPE, _typegeometry );
         if ( _typegeometry.equals( VALUE_GEOMETRY_TYPE ) )
         {
@@ -311,7 +309,7 @@ public class GeolocItem
      * @return The geolocItem object
      */
     public static GeolocItem fromJSON( String strJson )
-        throws JsonParseException, JsonMappingException, IOException
+        throws IOException
     {
         return _objectMapper.readValue( strJson, GeolocItem.class );
     }

@@ -33,30 +33,34 @@
  */
 package fr.paris.lutece.plugins.leaflet.business;
 
-import junit.framework.TestCase;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class GeolocItemTest extends TestCase
+public class GeolocItemTest
 {
-    public void testSerialize(  ) throws JsonParseException, JsonMappingException, IOException
+    @Test
+    void testSerialize(  ) throws JsonParseException, JsonMappingException, IOException
     {
         GeolocItem ref = new GeolocItem(  );
-        HashMap<String, Object> pref = new HashMap<String, Object>(  );
+        Map<String, Object> pref = new HashMap<>();
         pref.put( "layer", "aco" );
         pref.put( "icon", "ico" );
         pref.put( "address", "addo" );
 
-        HashMap<String, Object> gref = new HashMap<String, Object>(  );
+        Map<String, Object> gref = new HashMap<>();
+        gref.put( "type", "Point" );
         gref.put( "coordinates", Arrays.asList( new Double[] { 2.31272, 48.83632 } ) );
         ref.setGeometry( gref );
         ref.setProperties( pref );
@@ -70,27 +74,28 @@ public class GeolocItemTest extends TestCase
         assert a.equals( b ) : "Parsing ref string and ref.toJSON should produce equal objects";
 
         GeolocItem g = GeolocItem.fromJSON( s );
-        assert g.getLonLat(  ).equals( ref.getLonLat(  ) ) : "Check serialized field";
-        assert g.getAddress(  ).equals( ref.getAddress(  ) ) : "Check serialized field";
-        assert g.getIcon(  ).equals( ref.getIcon(  ) ) : "Check serialized field";
-        assert g.getLayer(  ).equals( ref.getLayer(  ) ) : "Check serialized field";
+        assertEquals( g.getLonLat(  ), ref.getLonLat(  ), "Check serialized field" );
+        assertEquals( g.getAddress(  ), ref.getAddress(  ), "Check serialized field" );
+        assertEquals( g.getIcon(  ), ref.getIcon(  ), "Check serialized field" );
+        assertEquals( g.getLayer(  ), ref.getLayer(  ), "Check serialized field" );
 
         GeolocItem g2 = GeolocItem.fromJSON( g.toJSON(  ) );
-        assert g2.getLonLat(  ).equals( ref.getLonLat(  ) ) : "Check serialized field";
-        assert g2.getAddress(  ).equals( ref.getAddress(  ) ) : "Check serialized field";
-        assert g2.getIcon(  ).equals( ref.getIcon(  ) ) : "Check serialized field";
-        assert g2.getLayer(  ).equals( ref.getLayer(  ) ) : "Check serialized field";
+        assertEquals( g2.getLonLat(  ), ref.getLonLat(  ), "Check serialized field" );
+        assertEquals( g2.getAddress(  ), ref.getAddress(  ), "Check serialized field" );
+        assertEquals( g2.getIcon(  ), ref.getIcon(  ), "Check serialized field" );
+        assertEquals( g2.getLayer(  ), ref.getLayer(  ), "Check serialized field" );
 
         String strRefXML = "<geoloc>\r\n" + "<lon>2.31272</lon>\r\n" + "<lat>48.83632</lat>\r\n" +
             "<address><![CDATA[addo]]></address>\r\n" + "<icon>ico</icon>\r\n" + "<layer>aco</layer>\r\n" +
             "</geoloc>\r\n";
 
         String strXML = ref.toXML(  );
-        assert strRefXML.equals( strXML ) : "Test xml marshalling: ref:\n" + strRefXML + "\n; got:\n" + strXML;
+        assertEquals( strRefXML, strXML, "Test xml marshalling: ref:\n" + strRefXML + "\n; got:\n" + strXML );
 
         GeolocItem missingref = new GeolocItem(  );
-        HashMap<String, Object> missingpref = new HashMap<String, Object>(  );
-        HashMap<String, Object> missinggref = new HashMap<String, Object>(  );
+        Map<String, Object> missingpref = new HashMap<>(  );
+        Map<String, Object> missinggref = new HashMap<>(  );
+        missinggref.put( "type", "Point" );
         missinggref.put( "coordinates", Arrays.asList( new Double[] { 2.31272, 48.83632 } ) );
         missingref.setGeometry( missinggref );
         missingref.setProperties( missingpref );
@@ -99,14 +104,14 @@ public class GeolocItemTest extends TestCase
             "</geoloc>\r\n";
 
         String strMissingXML = missingref.toXML(  );
-        assert strMissingRefXML.equals( strMissingXML ) : "Test missing xml marshalling: ref:\n" + strRefXML +
-        "\n; got:\n" + strXML;
+        assertEquals( strMissingRefXML,  strMissingXML, "Test missing xml marshalling: ref:\n" + strRefXML +
+        "\n; got:\n" + strXML);
 
         String smissing = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[2.31272,48.83632]},\"properties\":{}}";
         JsonNode bmissing = objectMapper.readTree( smissing );
         String jsonmissing = missingref.toJSON(  );
         JsonNode bmissingref = objectMapper.readTree( jsonmissing );
-        assert bmissingref.equals( bmissing ) : "Parsing,for missing fields, ref string and ref.toJSON should produce equal objects. strings are: \n" +
-        smissing + "\n and \n" + jsonmissing;
+        assertEquals( bmissingref, bmissing, "Parsing,for missing fields, ref string and ref.toJSON should produce equal objects. strings are: \n" +
+        smissing + "\n and \n" + jsonmissing );
     }
 }

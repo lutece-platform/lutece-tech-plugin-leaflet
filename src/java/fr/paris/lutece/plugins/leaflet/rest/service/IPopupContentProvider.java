@@ -33,7 +33,7 @@
  */
 package fr.paris.lutece.plugins.leaflet.rest.service;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 /**

@@ -34,12 +34,13 @@
 package fr.paris.lutece.plugins.leaflet.service;
 
 import fr.paris.lutece.portal.service.datastore.DatastoreService;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.util.ReferenceItem;
 import fr.paris.lutece.util.ReferenceList;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.literal.NamedLiteral;
+import jakarta.enterprise.inject.spi.CDI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,7 @@ public class IconService
     private static final String BEAN_PREFIX = "leaflet-icon-provider-";
     private static final String DATASTORE_PREFIX = "leaflet.icon.";
     private static final String DATASTORE_ICONS_PREFIX = DATASTORE_PREFIX + "icons.";
+    private static final String DEFAULT_ICON = "default";
 
 
     /** Private constructor */
@@ -69,7 +71,7 @@ public class IconService
     public static Collection<String> getList(  )
     {
         ReferenceList referenceList = DatastoreService.getDataByPrefix( DATASTORE_ICONS_PREFIX );
-        HashSet<String> hashSet = new HashSet<String>(  );
+        HashSet<String> hashSet = new HashSet<>(  );
 
         for ( ReferenceItem referenceItem : referenceList )
         {
@@ -78,9 +80,7 @@ public class IconService
             hashSet.add( code );
         }
 
-        ArrayList<String> result = new ArrayList<String>( hashSet );
-
-        return result;
+        return new ArrayList<>( hashSet );
     }
 
     /**
@@ -92,19 +92,34 @@ public class IconService
      */
     public static String getIcon( String strProvider, String strIconKey )
     {
-        try
-        {
-            IIconProvider iconProvider = (IIconProvider) SpringContextService.getBean( BEAN_PREFIX + strProvider );
-            String icon = iconProvider.getIcon( strIconKey );
+        Instance<IIconProvider> iconProviderInstance = CDI.current( ).select( IIconProvider.class, NamedLiteral.of( BEAN_PREFIX + strProvider ) );
 
-            return ( icon == null ) ? "default" : icon;
+        if ( iconProviderInstance.isResolvable( ) )
+        {
+            String icon = iconProviderInstance.get( ).getIcon( strIconKey );
+            return ( icon == null ) ? DEFAULT_ICON : icon;
         }
-        catch ( NoSuchBeanDefinitionException e )
-        {
-            AppLogService.error( "icon API: Missing strProvider " + strProvider + " , strIconKey " + strIconKey +
-                ", exception " + e );
 
-            return "default";
+        logProviderError( iconProviderInstance, strProvider, strIconKey );
+        return DEFAULT_ICON;
+    }
+
+    /**
+     * Logs an error message when the icon provider cannot be resolved.
+     *
+     * @param instance the CDI instance that failed to resolve
+     * @param strProvider the name of the provider
+     * @param strIconKey the key of the icon
+     */
+    private static void logProviderError(Instance<IIconProvider> instance, String strProvider, String strIconKey)
+    {
+        if ( instance.isAmbiguous( ) )
+        {
+            AppLogService.error( "icon API: Multiple providers found for '{}', iconKey '{}'", strProvider, strIconKey );
+        }
+        else
+        {
+            AppLogService.error( "icon API: Provider '{}' not found, iconKey '{}'", strProvider, strIconKey );
         }
     }
 }

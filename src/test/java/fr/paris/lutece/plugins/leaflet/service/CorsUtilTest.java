@@ -33,22 +33,23 @@
  */
 package fr.paris.lutece.plugins.leaflet.service;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
  * The Class CorsUtilTest.
  */
-public class CorsUtilTest {
+public class CorsUtilTest
+{
 
-	
+
 	/**
 	 * Checks if is valid origin test.
 	 */
 	@Test
-	public void isValidOriginTest()
+	void isValidOriginTest()
 	{
 		
 		String strPattern="https://*.paris.mdp:443/*,https://*.paris.mdp/*,https://*.paris.fr:443/*,https://*.paris.fr/*,https://*.paris.mdp:443,https://*.paris.mdp";
