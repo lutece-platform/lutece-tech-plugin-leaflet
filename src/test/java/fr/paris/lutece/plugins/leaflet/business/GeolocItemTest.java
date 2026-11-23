@@ -57,6 +57,7 @@ public class GeolocItemTest extends TestCase
         pref.put( "address", "addo" );
 
         HashMap<String, Object> gref = new HashMap<String, Object>(  );
+        gref.put( GeolocItem.PATH_GEOMETRY_TYPE, GeolocItem.VALUE_GEOMETRY_TYPE );
         gref.put( "coordinates", Arrays.asList( new Double[] { 2.31272, 48.83632 } ) );
         ref.setGeometry( gref );
         ref.setProperties( pref );
@@ -91,6 +92,7 @@ public class GeolocItemTest extends TestCase
         GeolocItem missingref = new GeolocItem(  );
         HashMap<String, Object> missingpref = new HashMap<String, Object>(  );
         HashMap<String, Object> missinggref = new HashMap<String, Object>(  );
+        missinggref.put( GeolocItem.PATH_GEOMETRY_TYPE, GeolocItem.VALUE_GEOMETRY_TYPE );
         missinggref.put( "coordinates", Arrays.asList( new Double[] { 2.31272, 48.83632 } ) );
         missingref.setGeometry( missinggref );
         missingref.setProperties( missingpref );
